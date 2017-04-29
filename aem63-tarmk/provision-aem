@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+#
+# Bash script for provisioning the AEM author instances
+
+set -e
+set -x
+# Configure Ubuntu Server with hostname mentioned in VagrantFile
+function hostconfig(){
+    export CLIENT_IP_ADDR=`ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}' | tail -1`
+    export CLIENT_FQDN=`hostname`
+    export CLIENT_NAME=`hostname | cut -d. -f 1 | tr '[:upper:]' '[:lower:]'`
+    echo "Configuring /etc/hosts ..."
+    echo "127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4" > /etc/hosts
+    echo "::1       localhost localhost.localdomain localhost6 localhost6.localdomain6" >> /etc/hosts
+    echo "$CLIENT_IP_ADDR    $CLIENT_FQDN $CLIENT_NAME" >> /etc/hosts
+}
+# Create aem user and AEM install root directory
+function userconfig(){
+   adduser aem
+   ssh-keygen -b 1024 -f aem -t dsa
+   sudo mkdir -p /home/aem/.ssh
+   cat aem.pub | sudo tee -a /home/aem/.ssh/authorized_keys
+   sudo chmod 600 /home/aem/.ssh/authorized_keys
+   sudo chmod 700 /home/aem/.ssh
+   sudo chown -R aem /home/aem
+
+}
+# Copy AEM Install Jar and Unpack. Copy Configs and Scripts
+function install_aem(){
+    export AEM_ROOT=/apps/aem/author
+    export AEM_USER=aem
+    export AEM_INSTALLABLE_JAR=cq-quickstart-6.3.0.jar
+    echo "Create folders under shared vagrant dir"
+    sudo apt-get install -y oracle-java8-set-default
+    mkdir -p /apps/aem/author
+    mkdir -p /apps/aem/java_tmp
+    chmod 777 /apps/aem/java_tmp	
+    echo "Copying AEM Installable Jar file from share"
+    cp /share/aem-software/$AEM_INSTALLABLE_JAR $AEM_ROOT/.
+    cp /share/aem-software/license.properties $AEM_ROOT/.
+    echo "Unpacking AEM Jar File"
+    cd $AEM_ROOT 
+    java -jar $AEM_ROOT/$AEM_INSTALLABLE_JAR -unpack
+    echo "Unpack Complete"
+    #echo "Copying AEM FileDatastore Configuration Files"
+    #mkdir -p $AEM_ROOT/crx-quickstart/install
+    #cp /share/aem-configs/aem-tarmk-fds/org.apache.jackrabbit.oak.plugins.blob.datastore.FileDataStore.config $AEM_ROOT/crx-quickstart/install
+    #cp /share/aem-configs/aem-tarmk-fds/org.apache.jackrabbit.oak.plugins.segment.SegmentNodeStoreService.config $AEM_ROOT/crx-quickstart/install
+    echo "Copy startup script"
+    cp /share/aem-configs/aem-tarmk-fds/start $AEM_ROOT/crx-quickstart/bin
+    echo "Set Folder Permissions for aem user"
+    sudo chown -R aem:aem /apps/aem
+    echo "Copy AEM Init Scripts ,to start and stop aem"
+    mkdir -p /etc/sysconfig
+    cp /share/aem-scripts/aem-config /etc/sysconfig
+    cp /share/aem-scripts/aem-init.sh /usr/local/bin
+    chmod +x /usr/local/bin/aem-init.sh
+}
+
+function update_repo(){
+    echo "Update Repositoryies"
+    sudo apt-get update -y
+}
+
+function install_java(){
+    echo "Install Java"
+    sudo add-apt-repository -y ppa:webupd8team/java
+    sudo apt-get update
+    sudo apt-get -y upgrade
+    echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections 
+    echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+    sudo apt-get -y install oracle-java8-installer
+}
+
+hostconfig
+userconfig
+update_repo
+install_java
+install_aem
+echo "Installation of AEM 6.3 is Ready !"
+echo "ssh into host, switch to aem user and Start AEM"
