@@ -30,9 +30,9 @@ Vagrant.configure("2") do |config|
   # Check whether an updated version of ubuntu Virtual Box available
   config.vm.box_check_update = true
   # Mount a shared folder from host machine into guest .
-  # Please change ~/MySSD/share to a location on your host
+  # Please change ../share to a location on your host
   # /share is mount available with in virtual machine
-  config.vm.synced_folder "~/MySSD/share", "/share"
+  config.vm.synced_folder "../share", "/share"
   # Section to specify server specs (cpus,memory,name,etc)
   config.vm.define "aem63-ubuntu" do |server|
     server.vm.provider "virtualbox" do |vb|
@@ -69,17 +69,25 @@ Please take a look at provision-aem contents , but the steps are
 ### Manual Steps
 ``` shell
 SSH into Host (vagrant ssh) from the location where VagrantFile available
-sudo su - ( to get root access into guest)
-su - aem
-cd /apps/aem/author/crx-quickstart
-bin/start
+$ vagrant ssh
+# Inside ubuntu machine execute
+$ sudo su - ( to get root access into guest)
+$ su - aem
+$ cd /apps/aem/author/crx-quickstart
+# Start AEM for the first time
+$ bin/start
+# Tail error.log 
+$ tail -f logs/error.log
 
 ```
-Alternative way to start AEM
 
-As 'root' user execute
+Access http://192.168.63.101:4502/ from host machine to verify the status of AEM
+
+##### Alternative way to start AEM
+
+As 'root' user within ubuntu server execute
 
 ```
-/usr/local/bin/aem-init
+$ /usr/local/bin/aem-init
 ```
 The above script takes care of switching to aem user before starting AEM Server. 
