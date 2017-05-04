@@ -1,0 +1,6 @@
+# AEM Installable and licence File #
+##########################################
+cq*.jar
+aem*.jar
+license.properties
+
