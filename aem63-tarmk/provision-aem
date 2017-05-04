@@ -5,7 +5,7 @@
 set -e
 set -x
 # Configure Ubuntu Server with hostname mentioned in VagrantFile
-function hostconfig(){
+function host_config(){
     export CLIENT_IP_ADDR=`ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}' | tail -1`
     export CLIENT_FQDN=`hostname`
     export CLIENT_NAME=`hostname | cut -d. -f 1 | tr '[:upper:]' '[:lower:]'`
@@ -15,7 +15,8 @@ function hostconfig(){
     echo "$CLIENT_IP_ADDR    $CLIENT_FQDN $CLIENT_NAME" >> /etc/hosts
 }
 # Create aem user and AEM install root directory
-function userconfig(){
+function aem_user_config(){
+   echo "Creating aem user"
    adduser aem
    ssh-keygen -b 1024 -f aem -t dsa
    sudo mkdir -p /home/aem/.ssh
@@ -42,12 +43,8 @@ function install_aem(){
     cd $AEM_ROOT 
     java -jar $AEM_ROOT/$AEM_INSTALLABLE_JAR -unpack
     echo "Unpack Complete"
-    #echo "Copying AEM FileDatastore Configuration Files"
-    #mkdir -p $AEM_ROOT/crx-quickstart/install
-    #cp /share/aem-configs/aem-tarmk-fds/org.apache.jackrabbit.oak.plugins.blob.datastore.FileDataStore.config $AEM_ROOT/crx-quickstart/install
-    #cp /share/aem-configs/aem-tarmk-fds/org.apache.jackrabbit.oak.plugins.segment.SegmentNodeStoreService.config $AEM_ROOT/crx-quickstart/install
     echo "Copy startup script"
-    cp /share/aem-configs/aem-tarmk-fds/start $AEM_ROOT/crx-quickstart/bin
+    cp /share/aem-configs/start $AEM_ROOT/crx-quickstart/bin
     echo "Set Folder Permissions for aem user"
     sudo chown -R aem:aem /apps/aem
     echo "Copy AEM Init Scripts ,to start and stop aem"
@@ -72,10 +69,10 @@ function install_java(){
     sudo apt-get -y install oracle-java8-installer
 }
 
-hostconfig
-userconfig
+host_config
+aem_user_config
 update_repo
 install_java
 install_aem
-echo "Installation of AEM 6.3 is Ready !"
-echo "ssh into host, switch to aem user and Start AEM"
+echo "Provisioning AEM 6.3 is Complete !"
+echo "Next Step --> ssh into host, switch to aem user and Start AEM"
