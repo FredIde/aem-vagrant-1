@@ -2,13 +2,13 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty64"
   config.vm.box_check_update = true
   config.vm.synced_folder "../share", "/share"
-  config.vm.define "aem63-ubuntu" do |server|
+  config.vm.define "aem63-tarmk" do |server|
     server.vm.provider "virtualbox" do |vb|
         vb.customize ["modifyvm", :id, "--cpus", "2"]
-        vb.name = "aem63-ubuntu"
+        vb.name = "aem63-tarmk"
         vb.memory = 4096
     end
-    server.vm.hostname = "aem63-ubuntu"
+    server.vm.hostname = "aem63-tarmk"
     server.vm.network :private_network, ip: "192.168.63.101"
     server.vm.provision :shell, path: "provision-aem", args: ENV['ARGS']
   end
