@@ -4,3 +4,6 @@ cq*.jar
 aem*.jar
 license.properties
 
+# Vagrant Files #
+# #################
+.vagrant/
