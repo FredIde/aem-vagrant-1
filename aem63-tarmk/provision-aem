@@ -14,22 +14,10 @@ function host_config(){
     echo "::1       localhost localhost.localdomain localhost6 localhost6.localdomain6" >> /etc/hosts
     echo "$CLIENT_IP_ADDR    $CLIENT_FQDN $CLIENT_NAME" >> /etc/hosts
 }
-# Create aem user and AEM install root directory
-function aem_user_config(){
-   echo "Creating aem user"
-   adduser aem
-   ssh-keygen -b 1024 -f aem -t dsa
-   sudo mkdir -p /home/aem/.ssh
-   cat aem.pub | sudo tee -a /home/aem/.ssh/authorized_keys
-   sudo chmod 600 /home/aem/.ssh/authorized_keys
-   sudo chmod 700 /home/aem/.ssh
-   sudo chown -R aem /home/aem
-
-}
 # Copy AEM Install Jar and Unpack. Copy Configs and Scripts
 function install_aem(){
     export AEM_ROOT=/apps/aem/author
-    export AEM_USER=aem
+    export AEM_USER=root
     export AEM_INSTALLABLE_JAR=cq-quickstart-6.3.0.jar
     echo "Create folders under shared vagrant dir"
     sudo apt-get install -y oracle-java8-set-default
@@ -45,8 +33,6 @@ function install_aem(){
     echo "Unpack Complete"
     echo "Copy startup script"
     cp /share/aem-configs/start $AEM_ROOT/crx-quickstart/bin
-    echo "Set Folder Permissions for aem user"
-    sudo chown -R aem:aem /apps/aem
     echo "Copy AEM Init Scripts ,to start and stop aem"
     mkdir -p /etc/sysconfig
     cp /share/aem-scripts/aem-config /etc/sysconfig
@@ -70,7 +56,6 @@ function install_java(){
 }
 
 host_config
-aem_user_config
 update_repo
 install_java
 install_aem
