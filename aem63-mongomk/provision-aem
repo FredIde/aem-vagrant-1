@@ -14,17 +14,7 @@ function host_config(){
     echo "::1       localhost localhost.localdomain localhost6 localhost6.localdomain6" >> /etc/hosts
     echo "$CLIENT_IP_ADDR    $CLIENT_FQDN $CLIENT_NAME" >> /etc/hosts
 }
-# Create aem user and AEM install root directory
-function aem_user_config(){
-   adduser aem
-   ssh-keygen -b 1024 -f aem -t dsa
-   sudo mkdir -p /home/aem/.ssh
-   cat aem.pub | sudo tee -a /home/aem/.ssh/authorized_keys
-   sudo chmod 600 /home/aem/.ssh/authorized_keys
-   sudo chmod 700 /home/aem/.ssh
-   sudo chown -R aem /home/aem
 
-}
 # Copy AEM Install Jar and Unpack. Copy Configs and Scripts
 function install_aem(){
     export AEM_ROOT=/apps/aem/author
@@ -34,7 +24,7 @@ function install_aem(){
     sudo apt-get install -y oracle-java8-set-default
     mkdir -p /apps/aem/author
     mkdir -p /apps/aem/java_tmp
-    chmod 777 /apps/aem/java_tmp	
+    chmod 777 /apps/aem/java_tmp
     echo "Copying AEM Installable Jar file from share"
     cp /share/aem-software/$AEM_INSTALLABLE_JAR $AEM_ROOT/.
     cp /share/aem-software/license.properties $AEM_ROOT/.
@@ -44,11 +34,15 @@ function install_aem(){
     echo "Unpack Complete"
     echo "Copy DocumentNodeStoreService.config from /share"
     mkdir -p $AEM_ROOT/crx-quickstart/install
-    cp /share/aem-mongo-configs/org.apache.jackrabbit.oak.plugins.document.DocumentNodeStoreService.config $AEM_ROOT/crx-quickstart/install
+    cp /share/aem-mongo-configs/63/org.apache.jackrabbit.oak.plugins.document.DocumentNodeStoreService.config $AEM_ROOT/crx-quickstart/install
+    cp /share/aem-mongo-configs/63/org.apache.jackrabbit.oak.plugins.blob.datastore.FileDataStore.config $AEM_ROOT/crx-quickstart/install
     echo "Copying aem startup script"
-    cp /share/aem-mongo-configs/start $AEM_ROOT/crx-quickstart/bin
-    echo "Set Folder Permissions for aem user"
-    sudo chown -R aem:aem /apps/aem
+    cp /share/aem-mongo-configs/63/start $AEM_ROOT/crx-quickstart/bin
+    echo "Create the shared Datastore links"
+    mkdir -p $AEM_ROOT/crx-quickstart/repository
+    ln -s /share/aem63-mongo-fds $AEM_ROOT/crx-quickstart/repository/datastore 
+   # echo "Set Folder Permissions for vagrant user"
+   # sudo chown -R vagrant:vagrant /apps/aem
     echo "Copy AEM Init Scripts ,to start and stop aem"
     mkdir -p /etc/sysconfig
     cp /share/aem-scripts/aem-config /etc/sysconfig
@@ -72,10 +66,9 @@ function install_java(){
 }
 
 host_config
-aem_user_config
 update_repo
 install_java
 install_aem
 echo "Provisioning AEM 6.3 Node is complete !"
-echo "Next Step --> ssh into host, switch to aem user and Start AEM"
+echo "Next Step --> ssh into host, Start AEM Process"
 
