@@ -1,10 +1,3 @@
-AEM 62 Cluster Specific Steps
-==============================
-- Configure Mongo Replicaset
-- Create AEM Author DB and USer
-- Configure Shared Data Store
-- Start AEM on Each Node
-
 Configure Mongo Replicaset
 ---------------------------
 
@@ -34,6 +27,7 @@ Configure Mongo Replicaset
 		var schema = db.system.version.findOne({"_id" : "authSchema"})
 		schema.currentVersion = 3
 		db.system.version.save(schema);
+
 Create AEM Author DB and User
  ------------------------------
 In mongo shell , execute the following snippet
@@ -46,23 +40,3 @@ In mongo shell , execute the following snippet
 					   { role: "clusterMonitor", db: "admin" }
 					 ]
 		  }) ;
-
-Configuring Shared Data Store
-----------------------------
-As there are multiple AEM nodes going to write / read from datastore , the datastor has to to be mounted on a shared mount
-
-The following commnad takes care of the symlinking the datastore path to external shared path
-
-	ln -s /share/aem62-mongo-fds $AEM_ROOT/crx-quickstart/repository/datastore
-	
-
-Starting AEM on Each Node
--------------
-
-- ssh into AEM Server (ssh vagrant@replace.with.ip)
-- sudo su -
-- AEM process should run with 'root' user permissions as the shareDS on host
-- cd /apps/aem/author/bin
-- Issue command 
-		$ ./start
-

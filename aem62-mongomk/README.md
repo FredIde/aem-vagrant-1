@@ -1,4 +1,4 @@
-AEM 62 Cluster Specific Steps
+AEM 62 Cluster Configuration
 ==============================
 - Configure Mongo Replicaset
 - Create AEM Author DB and USer
