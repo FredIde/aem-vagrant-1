@@ -32,6 +32,11 @@ Configure Mongo Replicaset
 	
     Mongo demons will be started on 27017,27018,27019
     
+  Note : To Stop Mongo use 
+         $ mongod -f /apps/mongodb/node1/conf/mongod.conf --shutdown
+         $ mongod -f /apps/mongodb/node2/conf/mongod.conf --shutdown
+         $ mongod -f /apps/mongodb/node3/conf/mongod.conf --shutdown
+         
 - Connect to Mongo Shell on 27017
 
 
@@ -76,6 +81,8 @@ AEM Node2 - 5502
 - sudo su -
 - AEM process should run with 'root' user permissions as the shareDS on host
 - cd /apps/aem/author/node1/crx-quickstart/bin
-- Issue command 
+- Starting AEM
 		$ ./start
+- Stoping AEM
+		$ ./stop
 
