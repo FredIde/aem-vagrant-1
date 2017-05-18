@@ -3,10 +3,15 @@ AEM 63 Cluster Configuration (all-in-one-server)
 Note : The result is one Ubuntu Server with Mongo 3.2.11 ( Primary-Secondary-Secondary replica set  with Two AEM Nodes)
 
 One time manual Steps 
-
+- Place AEM Installable and licence
 - Configure Mongo Replicaset
 - Create AEM Author DB and User
 - Start AEM on Each Node
+
+Place AEM Installable and licence
+---------------------------------
+- Copy AEM 63 Installable and licence.properties to aem-vagrant/share/aem-software
+- Installable name should be "cq-quickstart-6.3.0.jar" , If you are using a different name then the provisioning script has to be tweaked.
 
 Configure Mongo Replicaset
 ---------------------------
